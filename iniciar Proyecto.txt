@@ -1,0 +1,23 @@
+  # 1. Instalar dependencias (solo la primera vez)                                                                                                       
+  npm install                                                                                                                                            
+
+  # 2. Aplicar el schema a la base de datos (solo si es una base nueva)
+  npx prisma db push
+
+  # 3. Cargar usuarios de prueba (solo si la base está vacía)
+  npm run db:seed
+
+  # 4. Correr el servidor
+  npm run dev
+
+Demo de fila virtual (para mostrarle al cliente)
+
+  # Asegurate de que el servidor esté corriendo (npm run dev)
+  # Abrí http://localhost:3000/admin/cola en otra pestaña
+
+  npm run demo:fila
+
+  Esto inserta 500 usuarios en la cola del primer evento futuro y cada 5 segundos 50 "compran" y salen. Lo ves en tiempo real en el panel. Cuando
+  terminás:
+
+  npm run demo:fila:limpiar

@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# TypeScript build cache
+tsconfig.tsbuildinfo
+next-env.d.ts
+
+# SWC cache
+.swc/
+
+# Environment variables (contain secrets)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# SQLite database
+prisma/dev.db
+prisma/dev.db-journal
+
+# OS files
+.DS_Store
+desktop.ini
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor
+.vscode/settings.json
+
+# Claude Code (local AI assistant config — no subir al repo)
+.claude/

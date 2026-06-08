@@ -1,0 +1,62 @@
+{
+  "name": "ticketscap",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "queue:stress": "tsx scripts/queue-stress-test.ts",
+    "demo:fila": "tsx scripts/demo-fila.ts",
+    "demo:fila:limpiar": "tsx scripts/demo-fila.ts --limpiar",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "setup": "npm install && npx prisma generate && npx prisma db push && npx tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.10.2",
+    "bcryptjs": "^2.4.3",
+    "clsx": "^2.1.0",
+    "date-fns": "^3.3.1",
+    "jose": "^5.2.3",
+    "lucide-react": "^0.358.0",
+    "next": "^14.2.30",
+    "next-auth": "^4.24.7",
+    "qrcode": "^1.5.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "sharp": "^0.34.5",
+    "tailwind-merge": "^2.2.1",
+    "zustand": "^4.5.2"
+  },
+  "devDependencies": {
+    "@swc/core": "^1.15.26",
+    "@swc/jest": "^0.2.39",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^20.11.24",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^18.2.62",
+    "@types/react-dom": "^18.2.20",
+    "autoprefixer": "^10.4.18",
+    "jest": "^30.3.0",
+    "jest-environment-jsdom": "^30.3.0",
+    "postcss": "^8.4.35",
+    "prisma": "^5.10.2",
+    "tailwindcss": "^3.4.1",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}

@@ -1,0 +1,8 @@
+*quiero que hagas una venta escalonada de prueba donde solo puedan comprar socios y socios ranking en este momento y voy a probar con un usuario común darle a continuar y intentar entrar a la fila y comprar y luego voy a probar con el socio y verificar que funcione bien.
+
+- CDS🟨,EC🟥,PP🟥,EGF🟥,EGB🟥,EGR🟥
+
+
+- Al Cambiar QR por pdf con código con entrada 
+
+- Al registrare te tiene que mandar un mail de verificación o y comprar una entrada te tiene que mandar el pdf con el código de la entrada

@@ -1,0 +1,162 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password      String
+  name          String
+  ci            String?  @unique
+  phone         String?
+  phoneVerified Boolean  @default(false)
+  avatarUrl     String?
+  role            String    @default("HINCHA")
+  socioId         String?   @unique
+  suspendidoHasta DateTime?
+  razonSuspension String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  orders        Order[]
+  tickets       Ticket[]
+  socio         Socio?   @relation(fields: [socioId], references: [id])
+
+  @@map("users")
+}
+
+model Socio {
+  id            String   @id @default(cuid())
+  matricula     String   @unique
+  nombre        String
+  ci            String   @unique
+  categoria     String
+  estado        String   @default("AL_DIA")
+  cuotaAlDia    Boolean  @default(true)
+  antiguedad    Int      @default(0)
+  bloqueado     Boolean  @default(false)
+  motivoBloqueo String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User?
+
+  @@map("socios")
+}
+
+model Event {
+  id                    String    @id @default(cuid())
+  nombre                String
+  rival                 String
+  rivalEscudo           String?
+  fecha                 DateTime
+  horaGate              DateTime?
+  torneo                String
+  estadio               String    @default("Estadio Campeón del Siglo")
+  esLocal               Boolean   @default(true)
+  estado                String    @default("PROXIMO")
+  ventaEstado           String    @default("CERRADO")
+  descripcion           String?
+  imageUrl              String?
+  filaVirtual           Boolean   @default(false)
+  limiteXUsuario        Int       @default(4)
+  ventaEscalonadaActiva Boolean   @default(false)
+  diasAntesRanking      Int       @default(7)
+  diasAntesSocios       Int       @default(3)
+  diasAntesGeneral      Int       @default(1)
+  rankingMinAsistenciaPct Int     @default(45)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  sectores              Sector[]
+  tickets               Ticket[]
+
+  @@map("events")
+}
+
+model Sector {
+  id          String   @id @default(cuid())
+  eventId     String
+  nombre      String
+  tipo        String
+  capacidad   Int
+  disponibles Int
+  precio      Float
+  precioSocio Float    @default(0)
+  soloSocios  Boolean  @default(false)
+  esVisitante Boolean  @default(false)
+  esFamiliar  Boolean  @default(false)
+  habilitado  Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tickets     Ticket[]
+
+  @@map("sectors")
+}
+
+model Ticket {
+  id         String    @id @default(cuid())
+  eventId    String
+  sectorId   String
+  userId     String
+  orderId    String
+  qrCode     String    @unique
+  qrData     String
+  estado     String    @default("ACTIVO")
+  esCortesia Boolean   @default(false)
+  usadoAt    DateTime?
+  createdAt  DateTime  @default(now())
+  order      Order     @relation(fields: [orderId], references: [id])
+  user       User      @relation(fields: [userId], references: [id])
+  sector     Sector    @relation(fields: [sectorId], references: [id])
+  event      Event     @relation(fields: [eventId], references: [id])
+
+  @@map("tickets")
+}
+
+model Order {
+  id         String   @id @default(cuid())
+  userId     String
+  total      Float
+  estado     String   @default("PENDIENTE")
+  metodoPago String?
+  referencia String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id])
+  tickets    Ticket[]
+
+  @@map("orders")
+}
+
+model QueueEntry {
+  id           String    @id @default(cuid())
+  userId       String
+  eventId      String
+  token        String    @unique
+  posicion     Int
+  prioridad    Int       @default(0)
+  estado       String    @default("ESPERANDO")
+  accessToken  String?
+  accessExpiry DateTime?
+  expiresAt    DateTime
+  createdAt    DateTime  @default(now())
+
+  @@unique([userId, eventId])
+  @@map("queue_entries")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  accion    String
+  entidad   String
+  entidadId String?
+  detalle   String?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@map("audit_logs")
+}

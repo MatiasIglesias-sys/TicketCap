@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Ticket background -->
+  <path d="M2 10C2 8.9 2.9 8 4 8H28C29.1 8 30 8.9 30 10V13.5C28.1 13.5 26.5 14.6 26.5 16C26.5 17.4 28.1 18.5 30 18.5V22C30 23.1 29.1 24 28 24H4C2.9 24 2 23.1 2 22V18.5C3.9 18.5 5.5 17.4 5.5 16C5.5 14.6 3.9 13.5 2 13.5V10Z" fill="#F5C518"/>
+  <!-- Perforated divider -->
+  <line x1="11" y1="8" x2="11" y2="24" stroke="#1A1A1A" stroke-width="1.2" stroke-dasharray="2.5 2" stroke-linecap="round"/>
+  <!-- Text lines on stub -->
+  <rect x="14" y="12.5" width="12" height="1.5" rx="0.75" fill="#1A1A1A" opacity="0.7"/>
+  <rect x="14" y="15.2" width="9" height="1.5" rx="0.75" fill="#1A1A1A" opacity="0.7"/>
+  <rect x="14" y="17.9" width="11" height="1.5" rx="0.75" fill="#1A1A1A" opacity="0.7"/>
+  <!-- Star in left stub -->
+  <path d="M6.5 13.8L7.2 15.8H9.3L7.6 17.1L8.3 19.1L6.5 17.8L4.7 19.1L5.4 17.1L3.7 15.8H5.8Z" fill="#1A1A1A" opacity="0.8"/>
+</svg>
