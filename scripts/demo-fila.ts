@@ -38,6 +38,8 @@ const prisma = new PrismaClient();
 const TOTAL_USUARIOS = 500;
 const BATCH_CADA_TICK = 50;   // usuarios que "compran" por tick
 const TICK_MS = 5_000;        // cada 5 segundos
+const QUEUE_MAX_CONCURRENT = 50;    // debe coincidir con src/lib/queue.ts
+const QUEUE_ACCESS_MINUTES = 15;    // debe coincidir con src/lib/queue.ts
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 function sleep(ms: number) {
@@ -93,17 +95,23 @@ async function main() {
 
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // expira en 24h
 
-  const entries = Array.from({ length: TOTAL_USUARIOS }, (_, i) => ({
-    id: `demo-entry-${i}`,
-    userId: `demo-user-${i}`,
-    eventId: evento.id,
-    token: `demo-token-${i}-${Date.now()}`,
-    estado: "ESPERANDO",
-    posicion: i + 1,
-    prioridad: i % 5 === 0 ? 1 : 0, // 1 de cada 5 es socio con prioridad
-    expiresAt,
-    createdAt: new Date(Date.now() - (TOTAL_USUARIOS - i) * 1000),
-  }));
+  const accessExpiry = new Date(Date.now() + QUEUE_ACCESS_MINUTES * 60 * 1000);
+
+  const entries = Array.from({ length: TOTAL_USUARIOS }, (_, i) => {
+    const isActivo = i < QUEUE_MAX_CONCURRENT; // primeros 50 ocupan slots ACTIVO
+    return {
+      id: `demo-entry-${i}`,
+      userId: `demo-user-${i}`,
+      eventId: evento.id,
+      token: `demo-token-${i}-${Date.now()}`,
+      estado: isActivo ? "ACTIVO" : "ESPERANDO",
+      posicion: isActivo ? 0 : i - QUEUE_MAX_CONCURRENT + 1,
+      prioridad: i % 5 === 0 ? 1 : 0,
+      expiresAt,
+      createdAt: new Date(Date.now() - (TOTAL_USUARIOS - i) * 1000),
+      ...(isActivo ? { accessExpiry } : {}),
+    };
+  });
 
   // Insertar en lotes de 100 para no saturar SQLite
   for (let i = 0; i < entries.length; i += 100) {
@@ -116,42 +124,51 @@ async function main() {
   log(`🎬 Iniciando demo — cada 5s salen ${BATCH_CADA_TICK} usuarios.`);
   log(`👁️  Abrí http://localhost:3000/admin/cola para verlo en vivo.\n`);
 
-  // ── Loop: cada 5 segundos, marcar 50 como COMPLETADO ────────────────────
-  let total = TOTAL_USUARIOS;
+  // ── Loop: cada tick, un lote de ACTIVOS "compra" y se reemplazan con ESPERANDO ──
+  let completados = 0;
 
-  while (total > 0) {
+  while (true) {
     await sleep(TICK_MS);
 
-    // Tomar los primeros BATCH_CADA_TICK en ESPERANDO
-    const candidatos = await prisma.queueEntry.findMany({
-      where: { eventId: evento.id, userId: { startsWith: "demo-" }, estado: "ESPERANDO" },
-      orderBy: { posicion: "asc" },
+    // 1. Completar un lote de ACTIVOS (simulan que terminaron la compra)
+    const activosACompletar = await prisma.queueEntry.findMany({
+      where: { eventId: evento.id, userId: { startsWith: "demo-" }, estado: "ACTIVO" },
       take: BATCH_CADA_TICK,
       select: { id: true },
     });
 
-    if (candidatos.length === 0) break;
-
-    // Marcarlos ACTIVO (comprando) por 2 segundos, luego COMPLETADO
-    await prisma.queueEntry.updateMany({
-      where: { id: { in: candidatos.map((c) => c.id) } },
-      data: { estado: "ACTIVO", accessExpiry: new Date(Date.now() + 2000) },
-    });
-
-    await sleep(2000);
+    if (activosACompletar.length === 0) break;
 
     await prisma.queueEntry.updateMany({
-      where: { id: { in: candidatos.map((c) => c.id) } },
+      where: { id: { in: activosACompletar.map((c) => c.id) } },
       data: { estado: "COMPLETADO" },
     });
+    completados += activosACompletar.length;
 
-    total -= candidatos.length;
+    // 2. Avanzar ESPERANDO → ACTIVO para llenar los slots liberados
+    const nuevosActivos = await prisma.queueEntry.findMany({
+      where: { eventId: evento.id, userId: { startsWith: "demo-" }, estado: "ESPERANDO" },
+      orderBy: [{ prioridad: "desc" }, { posicion: "asc" }],
+      take: activosACompletar.length,
+      select: { id: true },
+    });
+
+    if (nuevosActivos.length > 0) {
+      const newAccessExpiry = new Date(Date.now() + QUEUE_ACCESS_MINUTES * 60 * 1000);
+      await prisma.queueEntry.updateMany({
+        where: { id: { in: nuevosActivos.map((c) => c.id) } },
+        data: { estado: "ACTIVO", posicion: 0, accessExpiry: newAccessExpiry },
+      });
+    }
 
     const esperando = await prisma.queueEntry.count({
       where: { eventId: evento.id, userId: { startsWith: "demo-" }, estado: "ESPERANDO" },
     });
+    const activos = await prisma.queueEntry.count({
+      where: { eventId: evento.id, userId: { startsWith: "demo-" }, estado: "ACTIVO" },
+    });
 
-    log(`🎫 ${candidatos.length} usuarios compraron → ${esperando} en espera, ${TOTAL_USUARIOS - esperando} completados`);
+    log(`🎫 ${activosACompletar.length} compraron, ${nuevosActivos.length} avanzaron → ${activos} activos, ${esperando} esperando, ${completados} completados`);
   }
 
   log(`\n🏁 Demo finalizado. Todos los usuarios pasaron por la fila.`);

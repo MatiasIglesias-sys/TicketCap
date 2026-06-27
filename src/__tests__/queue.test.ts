@@ -3,6 +3,7 @@
  * Cubre: signAccessToken, verifyAccessToken, computePrioridad,
  *        estimatedWaitMinutes, newQueueToken, trackEventView, getConcurrentViewers
  */
+
 import {
   signAccessToken,
   verifyAccessToken,
