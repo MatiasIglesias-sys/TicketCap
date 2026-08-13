@@ -29,7 +29,7 @@ const ESTADO_CONFIG = {
 
 export default function SociosTable({ socios }: { socios: Socio[] }) {
   const router = useRouter();
-  const [modal, setModal] = useState<{ socioId: string; nombre: string; suspendidoHasta: string | null } | null>(null);
+  const [modal, setModal] = useState<{ userId: string; nombre: string; suspendidoHasta: string | null } | null>(null);
 
   const now = new Date();
 
@@ -46,7 +46,7 @@ export default function SociosTable({ socios }: { socios: Socio[] }) {
     <>
       {modal && (
         <SuspenderModal
-          socioId={modal.socioId}
+          userId={modal.userId}
           nombre={modal.nombre}
           suspendidoHasta={modal.suspendidoHasta}
           onClose={() => setModal(null)}
@@ -107,8 +107,13 @@ export default function SociosTable({ socios }: { socios: Socio[] }) {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <button
-                        onClick={() => setModal({ socioId: socio.id, nombre: socio.nombre, suspendidoHasta: socio.suspendidoHasta })}
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+                        onClick={() =>
+                          socio.user &&
+                          setModal({ userId: socio.user.id, nombre: socio.nombre, suspendidoHasta: socio.suspendidoHasta })
+                        }
+                        disabled={!socio.user}
+                        title={socio.user ? undefined : "El socio no tiene cuenta vinculada"}
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
                           suspendido
                             ? "bg-alerta-rojo/10 hover:bg-alerta-rojo/20 text-alerta-rojo border border-alerta-rojo/30"
                             : "bg-white/5 hover:bg-white/10 text-gris-medio border border-white/10"

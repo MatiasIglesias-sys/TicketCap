@@ -14,6 +14,7 @@ const mockCount     = jest.fn();
 const mockTicketUpdateMany = jest.fn();
 const mockTransaction = jest.fn();
 const mockUpdateMany = jest.fn();
+const mockUserFindUnique = jest.fn();
 const mockGetServerSession = jest.fn();
 
 jest.mock("next-auth", () => ({
@@ -31,6 +32,9 @@ jest.mock("@/lib/prisma", () => ({
     },
     sector: {
       findUnique: (...args: unknown[]) => mockFindUnique(...args),
+    },
+    user: {
+      findUnique: (...args: unknown[]) => mockUserFindUnique(...args),
     },
     $transaction: (...args: unknown[]) => mockTransaction(...args),
     queueEntry: {
@@ -94,6 +98,8 @@ const makeGetRequest = () =>
 beforeEach(() => {
   jest.clearAllMocks();
   mockTicketUpdateMany.mockResolvedValue({ count: 0 });
+  // Por defecto el usuario no está suspendido
+  mockUserFindUnique.mockResolvedValue({ suspendidoHasta: null, razonSuspension: null });
 });
 
 describe("GET /api/tickets — autenticación", () => {

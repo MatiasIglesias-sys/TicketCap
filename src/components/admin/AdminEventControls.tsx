@@ -21,7 +21,7 @@ interface Props {
   currentDiasAntesRanking?: number;
   currentDiasAntesSocios?: number;
   currentDiasAntesGeneral?: number;
-  currentRankingMinAntiguedad?: number;
+  currentRankingMinAsistenciaPct?: number;
 }
 
 const VENTA_ESTADOS = [
@@ -99,7 +99,7 @@ export default function AdminEventControls({
   currentDiasAntesRanking = 7,
   currentDiasAntesSocios = 3,
   currentDiasAntesGeneral = 1,
-  currentRankingMinAntiguedad = 45,
+  currentRankingMinAsistenciaPct = 45,
 }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -124,7 +124,7 @@ export default function AdminEventControls({
     diasAntesRanking: currentDiasAntesRanking,
     diasAntesSocios: currentDiasAntesSocios,
     diasAntesGeneral: currentDiasAntesGeneral,
-    rankingMinAsistenciaPct: currentRankingMinAntiguedad,
+    rankingMinAsistenciaPct: currentRankingMinAsistenciaPct,
   });
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -145,7 +145,7 @@ export default function AdminEventControls({
       diasAntesRanking: currentDiasAntesRanking,
       diasAntesSocios: currentDiasAntesSocios,
       diasAntesGeneral: currentDiasAntesGeneral,
-      rankingMinAsistenciaPct: currentRankingMinAntiguedad,
+      rankingMinAsistenciaPct: currentRankingMinAsistenciaPct,
     });
   }, [
     open,
@@ -162,7 +162,7 @@ export default function AdminEventControls({
     currentDiasAntesRanking,
     currentDiasAntesSocios,
     currentDiasAntesGeneral,
-    currentRankingMinAntiguedad,
+    currentRankingMinAsistenciaPct,
   ]);
 
   useEffect(() => {

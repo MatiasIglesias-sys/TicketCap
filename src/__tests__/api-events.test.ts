@@ -14,6 +14,8 @@ const mockEventFindUnique = jest.fn();
 const mockEventCreate    = jest.fn();
 const mockEventUpdate    = jest.fn();
 const mockEventDelete    = jest.fn();
+const mockQueueEntryDeleteMany = jest.fn();
+const mockTicketDeleteMany = jest.fn();
 const mockGetServerSession = jest.fn();
 
 jest.mock("next-auth", () => ({
@@ -29,6 +31,12 @@ jest.mock("@/lib/prisma", () => ({
       create:     (...args: unknown[]) => mockEventCreate(...args),
       update:     (...args: unknown[]) => mockEventUpdate(...args),
       delete:     (...args: unknown[]) => mockEventDelete(...args),
+    },
+    queueEntry: {
+      deleteMany: (...args: unknown[]) => mockQueueEntryDeleteMany(...args),
+    },
+    ticket: {
+      deleteMany: (...args: unknown[]) => mockTicketDeleteMany(...args),
     },
   },
 }));
@@ -185,10 +193,15 @@ describe("DELETE /api/events/[id] — autorización", () => {
     mockGetServerSession.mockResolvedValue(SESSION_ADMIN);
     mockEventFindUnique.mockResolvedValue({ imageUrl: null });
     mockEventDelete.mockResolvedValue({});
+    mockQueueEntryDeleteMany.mockResolvedValue({ count: 0 });
+    mockTicketDeleteMany.mockResolvedValue({ count: 0 });
     const req = new NextRequest("http://localhost/api/events/evt-1", { method: "DELETE" });
     const res = await deleteEvent(req, { params: { id: "evt-1" } });
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.ok).toBe(true);
+    // Borra en cascada antes de eliminar el evento
+    expect(mockQueueEntryDeleteMany).toHaveBeenCalledWith({ where: { eventId: "evt-1" } });
+    expect(mockTicketDeleteMany).toHaveBeenCalledWith({ where: { eventId: "evt-1" } });
   });
 });

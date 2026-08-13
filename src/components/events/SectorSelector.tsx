@@ -25,6 +25,7 @@ interface Props {
   eventoId: string;
   eventoNombre: string;
   eventoFecha: string;
+  estadio?: string;
   isSocioAlDia: boolean;
   socioCategoria?: string;
   puedeComprar: boolean;
@@ -37,6 +38,7 @@ export default function SectorSelector({
   eventoId,
   eventoNombre,
   eventoFecha,
+  estadio = "Estadio Campeón del Siglo",
   isSocioAlDia,
   socioCategoria,
   puedeComprar,
@@ -104,15 +106,15 @@ export default function SectorSelector({
           Hacé click en un sector para seleccionarlo
         </p>
         <StadiumMap
+          estadioName={estadio}
           sectores={sectores}
-          selectedSectorId={selectedId ?? undefined}
+          selectedDbSectorId={selectedId}
           onSelectSector={(s) => {
-            if (!s.habilitado || s.disponibles === 0) return;
+            if (!s || !s.habilitado || s.disponibles === 0) return;
             setSelectedId(s.id);
             setCantidad(1);
             setError("");
           }}
-          isSocio={isSocioAlDia}
         />
       </div>
 

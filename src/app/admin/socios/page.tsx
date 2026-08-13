@@ -14,7 +14,14 @@ async function getSocios(q?: string) {
         }
       : undefined,
     include: {
-      user: { select: { email: true, id: true } },
+      user: {
+        select: {
+          id: true,
+          email: true,
+          suspendidoHasta: true,
+          razonSuspension: true,
+        },
+      },
     },
     orderBy: { matricula: "asc" },
     take: 50,
@@ -34,13 +41,18 @@ export default async function SociosPage({
     alDia: await prisma.socio.count({ where: { cuotaAlDia: true } }),
     morosos: await prisma.socio.count({ where: { cuotaAlDia: false } }),
     bloqueados: await prisma.socio.count({ where: { bloqueado: true } }),
-    suspendidos: await prisma.socio.count({ where: { suspendidoHasta: { gt: now } } }),
+    // La suspensión vive en User, no en Socio
+    suspendidos: await prisma.user.count({
+      where: { suspendidoHasta: { gt: now }, socioId: { not: null } },
+    }),
   };
 
   // Serialize dates for client component
   const sociosData = socios.map((s) => ({
     ...s,
-    suspendidoHasta: s.suspendidoHasta ? s.suspendidoHasta.toISOString() : null,
+    suspendidoHasta: s.user?.suspendidoHasta ? s.user.suspendidoHasta.toISOString() : null,
+    razonSuspension: s.user?.razonSuspension ?? null,
+    user: s.user ? { id: s.user.id, email: s.user.email } : null,
     createdAt: s.createdAt.toISOString(),
     updatedAt: s.updatedAt.toISOString(),
   }));
